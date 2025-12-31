@@ -12,7 +12,7 @@ namespace Auth.Application.Features.Signin
         private readonly ILogger _logger;
         private readonly ISender _sender;
 
-        public SigninEndpoint(ISender sender, ILogger logger)
+        public SigninEndpoint(ISender sender, ILogger<SigninEndpoint> logger)
         {
             _sender = sender ?? throw new ArgumentNullException(nameof(sender));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
