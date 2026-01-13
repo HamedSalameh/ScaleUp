@@ -1,4 +1,4 @@
-﻿using FastEndpoints;
+﻿using Auth.Infrastructure.KeyCloak;
 using FluentValidation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,14 +10,19 @@ namespace Auth.Application
     {
         public void Install(IServiceCollection services, IConfiguration configuration)
         {
+            // Register infrastructure dependencies
+            services.AddHttpClient();
+
             // Load infrastructure dependencies
             //services.AddAuthInfrastructure(configuration);
 
             // Register application services (handlers, validators, etc.)
-            //services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IKeyCloakService, KeyCloakService>();
 
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(AuthModuleInstaller).Assembly));
             services.AddValidatorsFromAssembly(typeof(AuthModuleInstaller).Assembly);
+
+            // Register endpoint mappings
         }
     }
 }

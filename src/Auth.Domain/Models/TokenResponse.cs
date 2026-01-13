@@ -8,6 +8,7 @@
         public string RefreshToken { get; init; } = NotSet;
         public string AccessToken { get; init; } = NotSet;
         public int ExpiresIn { get; init; } = 0;
+        public DateTime ExpiresAtUtc { get; init; } = DateTime.MinValue;
         public string TokenType { get; init; } = NotSet;
     }
 }

@@ -1,4 +1,4 @@
-﻿using LanguageExt.Common;
+﻿using FluentResults;
 using MediatR;
 
 namespace Auth.Application.Features.Signin

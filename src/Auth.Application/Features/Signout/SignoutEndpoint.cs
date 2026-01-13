@@ -1,5 +1,4 @@
-﻿
-using FastEndpoints;
+﻿using FastEndpoints;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -8,27 +7,23 @@ namespace Auth.Application.Features.Signout
 {
     public class SignoutEndpoint : Endpoint<SignoutRequest>
     {
-        private readonly ILogger<SignoutEndpoint> _logger;
         private readonly ISender _sender;
 
-        public SignoutEndpoint(ISender sender, ILogger<SignoutEndpoint> logger)
+        public SignoutEndpoint(ISender sender)
         {
             _sender = sender ?? throw new ArgumentNullException(nameof(sender));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public override void Configure()
         {
-            Post("/signout");
+            Post("/api/signout");
             AllowAnonymous();
-
             Summary(s =>
             {
                 s.Summary = "User Signout";
                 s.Description = "Endpoint for user signout that invalidates tokens.";
                 s.Response(204, "Successful signout.");
             });
-
             Options(o =>
             {
                 o.ProducesProblemDetails(400);
@@ -40,26 +35,28 @@ namespace Auth.Application.Features.Signout
 
         public override async Task HandleAsync(SignoutRequest signoutRequest, CancellationToken ct)
         {
-            if (_logger.IsEnabled(LogLevel.Information))
+            if (Logger.IsEnabled(LogLevel.Information))
             {
-                _logger.LogInformation("Received signout request for user: {UserId}", signoutRequest.UserId);
+                Logger.LogInformation("Received signout request for user: {UserId}", signoutRequest.UserId);
             }
 
             var signoutCommand = new SignoutCommand(signoutRequest);
             var response = await _sender.Send(signoutCommand, ct);
 
-            if (response.IsFaulted)
+            if (response.IsFailed)
             {
-                _logger.LogInformation("Signout failed for user {UserId}: {Error}", signoutRequest.UserId, response.ToString());
-                var error = response.Match(_ => "", ex => ex.Message);
+                Logger.LogInformation("Signout failed for user {UserId}: {Error}", signoutRequest.UserId, response.ToString());
 
-                AddError(error);
+                foreach (var error in response.Errors)
+                {
+                    AddError(error.Message);
+                }
 
-                await Send.ErrorsAsync(StatusCodes.Status400BadRequest, ct);
+                await Send.ErrorsAsync(400, ct);
                 return;
             }
 
-            _logger.LogInformation("User {UserId} signed out successfully.", signoutRequest.UserId);
+            Logger.LogInformation("User {UserId} signed out successfully.", signoutRequest.UserId);
             await Send.NoContentAsync(ct);
         }
     }

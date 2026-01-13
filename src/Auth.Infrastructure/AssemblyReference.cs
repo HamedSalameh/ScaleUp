@@ -2,9 +2,10 @@
 
 namespace Auth.Infrastructure
 {
-    public static class AssemblyReference
+    // Renamed to avoid CS0436 conflict with Auth.Domain.AssemblyReference
+    public static class InfrastructureAssemblyReference
     {
         // This is here so we can easily get a reference to this assembly
-        public static readonly Assembly Assembly = typeof(AssemblyReference).Assembly;
+        public static readonly Assembly Assembly = typeof(InfrastructureAssemblyReference).Assembly;
     }
 }

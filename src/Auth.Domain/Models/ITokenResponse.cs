@@ -6,6 +6,7 @@
         string AccessToken { get; init; }
         string RefreshToken { get; init; }
         int ExpiresIn { get; init; }
+        DateTime ExpiresAtUtc { get; init; }
         string TokenType { get; init; }
     }
 }

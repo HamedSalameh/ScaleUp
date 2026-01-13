@@ -1,4 +1,4 @@
-﻿using LanguageExt.Common;
+﻿using FluentResults;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -25,12 +25,12 @@ namespace Auth.Application.Features.Signout
                 // - Blacklist access token
                 // - Clear session data
 
-                return new Result<bool>(true);
+                return Result.Ok(true);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error during signout for user: {UserId}", request.Request.UserId);
-                return new Result<bool>(ex);
+                return Result.Fail<bool>(ex.Message);
             }
         }
     }

@@ -2,9 +2,9 @@
 
 namespace Auth.Infrastructure
 {
-    public static class AssemblyReference
+    public static class DomainAssemblyReference
     {
         // This is here so we can easily get a reference to this assembly
-        public static readonly Assembly Assembly = typeof(AssemblyReference).Assembly;
+        public static readonly Assembly Assembly = typeof(DomainAssemblyReference).Assembly;
     }
 }
