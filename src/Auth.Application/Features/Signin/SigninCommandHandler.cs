@@ -48,17 +48,17 @@ namespace Auth.Application.Features.Signin
                 // Build SigninResponse
                 var signinResponse = new SigninResponse(new TokenResponse
                 {
-                    AccessToken = tokenResult.Value,
+                    AccessToken = tokenResult.Value ?? string.Empty,
                     TokenType = BearerTokenType,
-                    ExpiresIn = _keycloakOptions.AccessTokenLifetimeMinutes * 60,
+                    ExpiresIn = _keycloakOptions.AccessTokenLifetimeMinutes,
                     ExpiresAtUtc = DateTime.UtcNow.AddMinutes(_keycloakOptions.AccessTokenLifetimeMinutes)
                 });
 
                 _logger.LogInformation(
                     "User {Username} signed in successfully. Token expires in {Minutes} minutes at {ExpiresAtUtc}.",
                     request.SigninRequest.Username,
-                    signinResponse.Token.ExpiresIn / 60,
-                    signinResponse.Token.ExpiresAtUtc
+                    signinResponse.Token!.ExpiresIn,
+                    signinResponse.Token!.ExpiresAtUtc
                 );
 
                 return Result.Ok(signinResponse);

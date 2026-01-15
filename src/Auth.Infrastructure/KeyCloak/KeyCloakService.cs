@@ -8,6 +8,13 @@ using System.Text.Json;
 
 namespace Auth.Infrastructure.KeyCloak
 {
+    public static class ClientScopes
+    {
+        public const string OpenId = "openid";
+        public const string Identity = "scaleup-identity";
+        public const string Authorization = "scaleup-authorization";
+    }
+
     public partial class KeyCloakService : IKeyCloakService
     {
         private readonly HttpClient _httpClient;
@@ -134,6 +141,8 @@ namespace Auth.Infrastructure.KeyCloak
 
         private async Task<Result<KeyCloakTokenResponse>> ExchangeCredentialsForTokens(string username, string password, CancellationToken cancellationToken)
         {
+            var requestedClientScopes = $"{ClientScopes.OpenId} {ClientScopes.Identity} {ClientScopes.Authorization}";
+
             try
             {
                 var tokenRequest = new Dictionary<string, string>
@@ -142,7 +151,8 @@ namespace Auth.Infrastructure.KeyCloak
                     { "client_id", _keycloakOptions.ClientId },
                     { "client_secret", _keycloakOptions.ClientSecret },
                     { "username", username },
-                    { "password", password }
+                    { "password", password },
+                    { "scope", requestedClientScopes }
                 };
 
                 using var content = new FormUrlEncodedContent(tokenRequest);

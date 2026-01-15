@@ -20,6 +20,12 @@ builder.Host.UseSerilog((ctx, lc) => lc
 // FastEndpoints setup
 builder.Services.AddFastEndpoints();
 
+// Remove server header for security reasons
+builder.Services.Configure<Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerOptions>(options =>
+{
+    options.AddServerHeader = false;
+});
+
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

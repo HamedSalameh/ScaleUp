@@ -2,6 +2,9 @@
 
 namespace Auth.Application.Features.Signin
 {
+    /// <summary>
+    /// Represents the result of a sign-in operation, including authentication tokens and any associated errors.
+    /// </summary>
     public class SigninResponse
     {
         public ITokenResponse? Token { get; set; }
