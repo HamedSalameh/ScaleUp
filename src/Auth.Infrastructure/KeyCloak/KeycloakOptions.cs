@@ -7,6 +7,12 @@ namespace Auth.Infrastructure.KeyCloak
         public const string SectionName = "Authentication:Keycloak";
 
         [Required]
+        public string BaseUrl { get; init; } = string.Empty;
+
+        [Required]
+        public string Realm { get; init; } = string.Empty;
+
+        [Required]
         public string Authority { get; init; } = string.Empty;
 
         [Required]
@@ -14,6 +20,13 @@ namespace Auth.Infrastructure.KeyCloak
 
         [Required]
         public string ClientSecret { get; init; } = string.Empty;
+
+        // Admin Client for user management
+        [Required]
+        public string AdminClientId { get; init; } = string.Empty;
+
+        [Required]
+        public string AdminClientSecret { get; init; } = string.Empty;
 
         public bool RequireHttpsMetadata { get; init; } = true;
         public bool SaveTokens { get; init; } = true;

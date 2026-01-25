@@ -1,5 +1,7 @@
-﻿using Auth.Domain.Models;
+﻿using Auth.Domain;
+using Auth.Domain.Models;
 using FluentResults;
+using LanguageExt;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -83,6 +85,71 @@ namespace Auth.Infrastructure.KeyCloak
             {
                 _logger.LogError(ex, "Unexpected error while signing in user {Username}.", username);
                 throw;
+            }
+        }
+
+        private async Task<string> GetAdminAccessTokenAsync(CancellationToken cancellationToken)
+        {
+            var tokenRequest = new Dictionary<string, string>
+            {
+                { "grant_type", "client_credentials" },
+                { "client_id", _keycloakOptions.AdminClientId },
+                { "client_secret", _keycloakOptions.AdminClientSecret },
+                { "scope", $"{ClientScopes.OpenId} {ClientScopes.Identity} {ClientScopes.Authorization}" }
+            };
+
+            using var content = new FormUrlEncodedContent(tokenRequest);
+            using var response = await _httpClient.PostAsync(_keycloakOptions.TokenEndpoint, content, cancellationToken);
+            response.EnsureSuccessStatusCode();
+            var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
+            var tokenResponse = JsonSerializer.Deserialize<KeyCloakTokenResponse>(responseContent, _jsonOptions);
+
+            if (tokenResponse == null || string.IsNullOrEmpty(tokenResponse.AccessToken))
+                throw new InvalidOperationException("Failed to obtain admin access token from Keycloak.");
+
+            return tokenResponse.AccessToken;
+        }
+
+        public async Task<Result<string>> CreateUserAsync(string email, string password, string firstName, string lastName, CancellationToken cancellationToken)
+        {
+            var token = await GetAdminAccessTokenAsync(cancellationToken);  // Get admin token to create user
+
+            var createUserUrl = $"{_keycloakOptions.BaseUrl}/admin/realms/{_keycloakOptions.Realm}/users";
+            var request = new HttpRequestMessage(HttpMethod.Post, createUserUrl);
+            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(AuthConstants.BearerTokenType, token);
+
+            var payload = new
+            {
+                username = email,
+                email = email,
+                firstName = firstName,
+                lastName = lastName,
+                enabled = true,
+                credentials = new[]
+                {
+                    new
+                    {
+                        type = "password",
+                        value = password,
+                        temporary = false
+                    }
+                },
+            };
+
+            request.Content = new StringContent(JsonSerializer.Serialize(payload, _jsonOptions), System.Text.Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.SendAsync(request, cancellationToken);
+
+            if (response.IsSuccessStatusCode)
+            {
+                _logger.LogInformation("User {Email} created successfully.", email);
+                return Result.Ok("User created successfully.");
+            }
+            else
+            {
+                var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
+                _logger.LogWarning("Failed to create user {Email}: {Response}", email, responseContent);
+                return Result.Fail<string>($"Failed to create user: {responseContent}");
             }
         }
 

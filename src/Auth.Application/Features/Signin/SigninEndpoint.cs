@@ -12,7 +12,7 @@ public class SigninEndpoint : Endpoint<SigninRequest, SigninResponse>
 
     public SigninEndpoint(ISender sender)
     {
-        _sender = sender;
+        _sender =  sender ?? throw new ArgumentNullException(nameof(sender));
     }
 
     public override void Configure()

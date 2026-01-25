@@ -24,7 +24,6 @@
 
 	<ItemGroup>
 		<Folder Include="Features\ResetPassword\" />
-		<Folder Include="Features\Signup\" />
 	</ItemGroup>
 
 	<ItemGroup>

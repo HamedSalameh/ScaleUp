@@ -1,4 +1,5 @@
-﻿using Auth.Domain.Models;
+﻿using Auth.Domain;
+using Auth.Domain.Models;
 using Auth.Infrastructure.KeyCloak;
 using FluentResults;
 using MediatR;
@@ -9,8 +10,6 @@ namespace Auth.Application.Features.Signin
 {
     public class SigninCommandHandler : IRequestHandler<SigninCommand, Result<SigninResponse>>
     {
-        private const string BearerTokenType = "Bearer";
-
         private readonly ILogger<SigninCommandHandler> _logger;
         private readonly IKeyCloakService _keyCloakService;
         private readonly KeycloakOptions _keycloakOptions;
@@ -49,7 +48,7 @@ namespace Auth.Application.Features.Signin
                 var signinResponse = new SigninResponse(new TokenResponse
                 {
                     AccessToken = tokenResult.Value ?? string.Empty,
-                    TokenType = BearerTokenType,
+                    TokenType = AuthConstants.BearerTokenType,
                     ExpiresIn = _keycloakOptions.AccessTokenLifetimeMinutes,
                     ExpiresAtUtc = DateTime.UtcNow.AddMinutes(_keycloakOptions.AccessTokenLifetimeMinutes)
                 });
